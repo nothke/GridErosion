@@ -52,6 +52,28 @@ public class Gridmaker : MonoBehaviour
 
     void Erode(ref float[] heights)
     {
+        const int DROPLETS = 100;
+        const int ENERGY = 3;
+
+
+        for (int i = 0; i < DROPLETS; i++)
+        {
+
+            int x = Random.Range(0, SIZE);
+            int y = Random.Range(0, SIZE);
+
+            int energy = ENERGY;
+
+            while (energy > 0)
+            {
+
+                energy--;
+            }
+        }
+    }
+
+    void AdjacentDepositionErode(ref float[] heights)
+    {
         float[] temp = new float[SIZE * SIZE];
 
         for (int x = 0; x < SIZE; x++)
@@ -110,6 +132,13 @@ public class Gridmaker : MonoBehaviour
         {
             heights[i] += temp[i];
         }
+    }
+
+    Vector2 SlopeAt(int x, int y)
+    {
+        float xSlope = HeightAt(heights, x - 1, y) - HeightAt(heights, x + 1, y);
+        float ySlope = HeightAt(heights, x, y - 1) - HeightAt(heights, x, y + 1);
+        return new Vector2(xSlope, ySlope);
     }
 
     float HeightAt(float[] heights, int x, int y)
