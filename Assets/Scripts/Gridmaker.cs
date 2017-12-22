@@ -9,16 +9,18 @@ public class Gridmaker : MonoBehaviour
 
     const int SIZE = 100;
 
+    float[] heights;
+
     void Start()
     {
-        float[] heights = new float[SIZE * SIZE];
+        heights = new float[SIZE * SIZE];
 
         for (int x = 0; x < SIZE; x++)
         {
             for (int y = 0; y < SIZE; y++)
             {
-                heights[y * SIZE + x] = Mathf.PerlinNoise(x * 0.543f, y * 0.543f) * 1;
-                heights[y * SIZE + x] += Mathf.PerlinNoise(x * 0.254f, y * 0.254f) * 2;
+                //heights[y * SIZE + x] = Mathf.PerlinNoise(x * 0.543f, y * 0.543f) * 1;
+                //heights[y * SIZE + x] += Mathf.PerlinNoise(x * 0.254f, y * 0.254f) * 2;
                 heights[y * SIZE + x] += Mathf.PerlinNoise(x * 0.123f, y * 0.123f) * 4;
                 heights[y * SIZE + x] += Mathf.PerlinNoise(x * 0.0332f, y * 0.0332f) * 10;
             }
@@ -32,9 +34,25 @@ public class Gridmaker : MonoBehaviour
         gameObject.InitMesh(g.ToMesh());
     }
 
+    void RegenMesh()
+    {
+        Grid g = Grid.Create(SIZE, SIZE, 1);
+        g.AddHeights(heights);
+        gameObject.SetMesh(g.ToMesh());
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Erode(ref heights);
+            RegenMesh();
+        }
+    }
+
     void Erode(ref float[] heights)
     {
-        float[] temp = new float[SIZE];
+        float[] temp = new float[SIZE * SIZE];
 
         for (int x = 0; x < SIZE; x++)
         {
@@ -45,8 +63,17 @@ public class Gridmaker : MonoBehaviour
                 float ySlope = HeightAt(heights, x, y - 1) - HeightAt(heights, x, y + 1);
                 Vector2 slope = new Vector2(xSlope, ySlope);
 
-                Debug.DrawRay(new Vector3(x, heights[y * SIZE + x], y), new Vector3(slope.x, 0, slope.y), Color.red, 5);
+                // remove some soil according to steepness
+                temp[y * SIZE + x] = -slope.magnitude * 0.1f;
+
+                //Debug.DrawRay(new Vector3(x, heights[y * SIZE + x], y), new Vector3(slope.x, 0, slope.y), Color.red, 5);
             }
+        }
+
+        // apply erosion
+        for (int i = 0; i < SIZE * SIZE; i++)
+        {
+            heights[i] += temp[i];
         }
     }
 
